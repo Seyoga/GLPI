@@ -1,0 +1,397 @@
+/* Общие стили оформления для интерфейса пользователей плагина CustomHelpdesk */
+/* Серо-белый градиент для пользователей - применяется по умолчанию */
+body {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 25%, #f1f3f5 50%, #e9ecef 75%, #dee2e6 100%) !important;
+    background-attachment: fixed !important;
+    min-height: 100vh !important;
+}
+
+/* Градиент для страницы closed_tickets.php */
+body:has([href*="closed_tickets.php"]),
+body[data-page*="closed_tickets"] {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 25%, #f1f3f5 50%, #e9ecef 75%, #dee2e6 100%) !important;
+    background-attachment: fixed !important;
+    min-height: 100vh !important;
+}
+
+/* Применяем серо-белый градиент к основным контейнерам страниц */
+.page,
+.page-body,
+.page-body.container-fluid,
+.container-fluid {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 25%, #f1f3f5 50%, #e9ecef 75%, #dee2e6 100%) !important;
+    background-attachment: fixed !important;
+}
+
+/* Стили для sidebar теперь применяются через critical.css.php с условной логикой */
+/* Убраны отсюда, чтобы не конфликтовать со стилями для специалистов */
+
+/* Header - серо-белый градиент */
+header.navbar,
+header.navbar.navbar-expand-lg {
+    background: linear-gradient(90deg, #ffffff 0%, #f8f9fa 50%, #f1f3f5 100%) !important;
+    background-attachment: fixed !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Прозрачный фон для breadcrumb */
+header.navbar .breadcrumb {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+/* СТИЛИ ДЛЯ SIDEBAR - применяются ТОЛЬКО для пользователей через critical.css.php */
+/* Для специалистов и админов sidebar остается видимым */
+/* Скрытие sidebar для пользователей происходит в critical.css.php */
+/* Стили для админов (темный текст) применяются через critical.css.php */
+
+/* Стили для скрытия лишних блоков на главной странице helpdesk.public.php */
+/* Скрываем карточку с заявками на главной странице helpdesk */
+#grid_1957401110,
+.masonry_grid {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Стили для скрытия элементов на ticket.form.php */
+/* Скрываем левую панель вкладок */
+#tabspanel {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Скрываем breadcrumb "Заявки" на ticket.form.php */
+.breadcrumb-item a[href*="ticket.php"][title="Заявки"],
+.breadcrumb-item a[href*="/front/ticket.php"][title="Заявки"],
+.breadcrumb-item:has(a[href*="ticket.php"][title="Заявки"]),
+.breadcrumb-item:has(a[href*="/front/ticket.php"]) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Скрываем кнопки навбара на ticket.form.php */
+.nav.navbar-nav a[href*="helpdesk.public.php?create_ticket=1"][title="Добавить"],
+.nav.navbar-nav a[href*="ticket.php"][title="Поиск"],
+.nav.navbar-nav a.show-saved-searches[data-itemtype="ticket"][title="Список"],
+.nav-item:has(a[href*="helpdesk.public.php?create_ticket=1"][title="Добавить"]),
+.nav-item:has(a[href*="ticket.php"][title="Поиск"]),
+.nav-item:has(a.show-saved-searches[data-itemtype="ticket"][title="Список"]) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Скрываем контейнер с кнопками навбара, только если нет видимых элементов .nav-item */
+.nav.navbar-nav.border-start:not(:has(.nav-item:visible)) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Стили для скрытия элементов на closed_tickets.php */
+/* Скрываем breadcrumb "Поддержка" */
+.breadcrumb-item a[href*="ticket.php"][title="Поддержка"],
+.breadcrumb-item:has(a[title="Поддержка"]) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Скрываем кнопки навбара на closed_tickets.php */
+.nav.navbar-nav a[href*="ticket.form.php"][title="Добавить"],
+.nav.navbar-nav a[href*="ticket.php"][title="Поиск"],
+.nav.navbar-nav a.show-saved-searches[data-itemtype="Ticket"][title="Список"],
+.nav.navbar-nav a[href*="showglobalkanban=1"][title="Общий Канбан"],
+.nav-item:has(a[href*="ticket.form.php"][title="Добавить"]),
+.nav-item:has(a[href*="ticket.php"][title="Поиск"]),
+.nav-item:has(a.show-saved-searches[data-itemtype="Ticket"][title="Список"]),
+.nav-item:has(a[href*="showglobalkanban=1"][title="Общий Канбан"]) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Скрываем весь контейнер с кнопками navbar на closed_tickets.php */
+.nav.navbar-nav.border-start.border-left,
+.nav.navbar-nav.border-start {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Стили для таблицы закрытых заявок (closed_tickets.php) */
+.card .table {
+    font-size: 15px !important;
+}
+
+.card .table thead th {
+    font-size: 15px !important;
+    padding: 10px 8px;
+    font-weight: 600;
+}
+
+.card .table tbody td {
+    font-size: 15px !important;
+    padding: 10px 8px;
+}
+
+.card .table .badge {
+    font-size: 14px !important;
+    padding: 5px 10px;
+}
+
+/* Увеличенный размер для оценок в закрытых заявках */
+.card .table tbody td:nth-child(5) {
+    font-size: 16px !important;
+}
+
+/* Увеличенный размер для заголовка "Закрытые заявки" */
+.card-header h3 {
+    font-size: 20px !important;
+    padding: 14px 18px;
+}
+
+.card-header h3 i {
+    font-size: 20px;
+    margin-right: 8px;
+}
+
+/* Увеличенный размер для кнопки "Вернуться к заявкам" */
+.card-footer .btn {
+    font-size: 15px !important;
+    padding: 8px 18px;
+}
+
+/* Скрыть элемент "Удалено" */
+a.list-group-item[href*="is_deleted=1"] {
+    display: none !important;
+}
+
+/* Скрыть маленькие кнопки создания тикетов */
+a.btn-sm.btn-outline-secondary[href*="helpdesk.public.php"] {
+    display: none !important;
+}
+
+/* Альтернативный вариант - скрыть все маленькие кнопки создания */
+a.btn-sm.btn-outline-secondary {
+    display: none !important;
+}
+
+/* Стили для большой кнопки создания тикета */
+.btn-create-ticket-big {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white !important;
+    font-size: 24px;
+    padding: 20px 60px;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: bold;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.btn-create-ticket-big:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    color: white !important;
+    text-decoration: none;
+}
+
+/* Стили для таблицы заявок */
+#user-tickets-card {
+    margin-top: 20px;
+}
+
+#user-tickets-card .table {
+    margin-bottom: 0;
+}
+
+#user-tickets-card .table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+}
+
+#user-tickets-card .table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+#user-tickets-card .table tbody td a {
+    color: #333;
+    text-decoration: none;
+}
+
+#user-tickets-card .table tbody td a:hover {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+/* Стили для блока контактов */
+#custom-helpdesk-contacts {
+    font-family: Arial, sans-serif;
+}
+
+#custom-helpdesk-contacts h5 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+#custom-helpdesk-contacts strong {
+    color: #333;
+    font-size: 14px;
+}
+
+/* Стили для кнопки закрытия задачи */
+#custom-close-ticket-btn {
+    text-align: center;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+#btn-close-ticket {
+    min-width: 200px;
+}
+
+#btn-close-ticket:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Sidebar оставляем видимым (позже решим вопрос) */
+
+/* Стили для категорий */
+#categories-card {
+    margin-top: 20px;
+}
+
+.category-group {
+    margin-bottom: 20px;
+}
+
+.category-toggle {
+    font-weight: 600;
+    text-align: left;
+}
+
+.category-toggle i {
+    margin-right: 8px;
+    transition: transform 0.3s ease;
+}
+
+.category-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.category-item {
+    margin-bottom: 5px;
+}
+
+.category-select {
+    transition: all 0.2s ease;
+}
+
+.category-select:hover {
+    transform: translateX(5px);
+}
+
+.category-select.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+#selected-category-info {
+    border-left: 4px solid #007bff;
+}
+
+/* Скрыть поля на странице ticket.form.php */
+/* Поле "Тип" */
+label[for^="type_"],
+select[name="type"],
+select[id^="dropdown_type"],
+.form-field:has(label[for^="type_"]),
+.form-field:has(select[name="type"]),
+.form-field:has(select[id^="dropdown_type"]) {
+    display: none !important;
+}
+
+/* Скрыть select2 контейнер для поля "Тип" */
+select[name="type"] + span.select2,
+select[id^="dropdown_type"] + span.select2 {
+    display: none !important;
+}
+
+/* Поле "Согласование" */
+label[for^="global_validation_"] {
+    display: none !important;
+}
+
+/* Скрыть аккордеон "Участники" */
+#heading-actor,
+button[data-bs-target="#actors"] {
+    display: none !important;
+}
+
+/* Скрыть аккордеон "Связанные заявки" */
+#linked_tickets-heading {
+    display: none !important;
+}
+
+/* Скрыть поле "Наблюдатели" */
+label[for^="observer_"],
+select[data-actor-type="observer"],
+.form-field:has(label[for^="observer_"]),
+.form-field:has(select[data-actor-type="observer"]) {
+    display: none !important;
+}
+
+/* Скрыть select2 контейнер для поля "Наблюдатели" */
+select[data-actor-type="observer"] + span.select2 {
+    display: none !important;
+}
+
+/* Скрыть поле "Категория" */
+label[for^="dropdown_itilcategories_id_"],
+select[name="itilcategories_id"],
+select[id^="dropdown_itilcategories_id"],
+.form-field:has(label[for^="dropdown_itilcategories_id_"]),
+.form-field:has(select[name="itilcategories_id"]) {
+    display: none !important;
+}
+
+/* Скрыть select2 контейнер для поля "Категория" */
+select[name="itilcategories_id"] + span.select2,
+select[id^="dropdown_itilcategories_id"] + span.select2 {
+    display: none !important;
+}
