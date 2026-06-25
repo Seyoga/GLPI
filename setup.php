@@ -2,6 +2,7 @@
 
 define('PLUGIN_CUSTOMHELPDESK_VERSION', '1.0.0');
 
+
 function plugin_init_customhelpdesk() {
     global $PLUGIN_HOOKS;
     
@@ -19,6 +20,7 @@ function plugin_init_customhelpdesk() {
     
     $request_uri = $_SERVER['REQUEST_URI'] ?? '';
     $is_ticket_form = (strpos($request_uri, 'ticket.form.php') !== false);
+    $is_entity_form = (strpos($request_uri, 'entity.form.php') !== false);
     
     if ($profile_check !== false) {
         // Профиль разрешен (пользователь) - загружаем CSS и JavaScript
@@ -52,7 +54,15 @@ function plugin_init_customhelpdesk() {
             'js/custom.rating.js'
         ];
     }
-    // Для админов на других страницах ничего не загружаем - стандартный интерфейс GLPI
+
+    // Загружаем скрипт на странице Организации для всех (включая админов)
+    if ($is_entity_form) {
+        if (!isset($PLUGIN_HOOKS['add_javascript']['customhelpdesk'])) {
+            $PLUGIN_HOOKS['add_javascript']['customhelpdesk'] = [];
+        }
+        $PLUGIN_HOOKS['add_javascript']['customhelpdesk'][] = 'js/custom.entity.js';
+    }
+    // Для админов на других страницах ничего не загружаем
     
     // Хуки применяются для разрешенных профилей (пользователи и специалисты) и для админов на ticket.form (путь к плагину для блока оценки)
     if ($profile_check !== false || $specialist_check !== false || $is_ticket_form) {
@@ -61,15 +71,13 @@ function plugin_init_customhelpdesk() {
             $PLUGIN_HOOKS['post_init']['customhelpdesk'] = 'plugin_customhelpdesk_post_init';
         }
         
-        // МЕТОД 2: Хук html_head - добавляет стили в head и путь к плагину (для блока оценки на ticket.form нужен путь и для админов)
+       
         $PLUGIN_HOOKS['html_head']['customhelpdesk'] = 'plugin_customhelpdesk_html_head';
     
-        // МЕТОД 3: Хук display_central - для центральной страницы
         if ($profile_check !== false) {
             $PLUGIN_HOOKS['display_central']['customhelpdesk'] = 'plugin_customhelpdesk_display_central';
         }
         
-        // МЕТОД 4: Хук pre_show_item - инъекция стилей перед отображением элементов
         // Применяется для всех типов элементов (Ticket, Computer, и т.д.)
         if ($profile_check !== false) {
             $PLUGIN_HOOKS['pre_show_item']['customhelpdesk'] = [
@@ -81,10 +89,26 @@ function plugin_init_customhelpdesk() {
     }
     // Для админов хуки не регистрируются - стандартный интерфейс GLPI
     
+    // --- Перехватываем создание и обновление Организации (Entity) ---
+    // Это нужно, чтобы GLPI принудительно сохранял кастомные поля
+    if (!isset($PLUGIN_HOOKS['item_update']['customhelpdesk'])) {
+        $PLUGIN_HOOKS['item_update']['customhelpdesk'] = [];
+    }
+    if (!isset($PLUGIN_HOOKS['item_add']['customhelpdesk'])) {
+        $PLUGIN_HOOKS['item_add']['customhelpdesk'] = [];
+    }
+    
+    $PLUGIN_HOOKS['item_update']['customhelpdesk'] = [
+        'Entity' => 'plugin_customhelpdesk_force_save_entity_hours'
+    ];
+    $PLUGIN_HOOKS['item_add']['customhelpdesk'] = [
+        'Entity' => 'plugin_customhelpdesk_force_save_entity_hours'
+    ];
+
+    
+
     Plugin::registerClass('PluginCustomhelpdeskConfig');
     
-    // Подавляем предупреждение "Array to string conversion" в tracking.injector.php и helpdesk.public.php
-    // Это известная проблема в некоторых версиях GLPI при работе с Twig шаблонами
     $request_uri = $_SERVER['REQUEST_URI'] ?? '';
     if (strpos($request_uri, 'tracking.injector.php') !== false || 
         (strpos($request_uri, 'helpdesk.public.php') !== false && strpos($request_uri, 'create_ticket=1') !== false)) {

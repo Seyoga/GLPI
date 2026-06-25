@@ -90,6 +90,15 @@ function plugin_customhelpdesk_install() {
             }
         }
     }
+
+    // --- Добавляем кастомные поля для таблицы Организаций (glpi_entities) ---
+    if (!$DB->fieldExists('glpi_entities', 'plugin_customhelpdesk_work_hours')) {
+        $DB->queryOrDie("ALTER TABLE `glpi_entities` ADD COLUMN `plugin_customhelpdesk_work_hours` VARCHAR(255) NULL", $DB->error());
+    }
+    
+    if (!$DB->fieldExists('glpi_entities', 'plugin_customhelpdesk_lunch_hours')) {
+        $DB->queryOrDie("ALTER TABLE `glpi_entities` ADD COLUMN `plugin_customhelpdesk_lunch_hours` VARCHAR(255) NULL", $DB->error());
+    }
     
     return true;
 }
@@ -108,12 +117,21 @@ function plugin_customhelpdesk_uninstall() {
     if ($DB->tableExists($ratings_table)) {
         $DB->queryOrDie("DROP TABLE `$ratings_table`", $DB->error());
     }
+
+    // --- Удаляем кастомные поля из таблицы Организаций ---
+    if ($DB->fieldExists('glpi_entities', 'plugin_customhelpdesk_work_hours')) {
+        $DB->queryOrDie("ALTER TABLE `glpi_entities` DROP COLUMN `plugin_customhelpdesk_work_hours`", $DB->error());
+    }
+    
+    if ($DB->fieldExists('glpi_entities', 'plugin_customhelpdesk_lunch_hours')) {
+        $DB->queryOrDie("ALTER TABLE `glpi_entities` DROP COLUMN `plugin_customhelpdesk_lunch_hours`", $DB->error());
+    }
     
     return true;
 }
 
 /**
- * МЕТОД 1: Хук post_init - вызывается после инициализации фреймворка
+ * Хук post_init - вызывается после инициализации фреймворка
  * Самый ранний хук, можно использовать для подготовки данных
  */
 function plugin_customhelpdesk_post_init() {
@@ -135,7 +153,7 @@ function plugin_customhelpdesk_post_init() {
 }
 
 /**
- * МЕТОД 2: Хук html_head - добавляет стили в head страницы.
+ * Хук html_head - добавляет стили в head страницы.
  * Добавляет небольшой inline CSS ПРЯМО в head для ускоренного применения до рендеринга.
  *
  * ВАЖНО: В GLPI хук html_head может не вызываться на всех страницах или вызываться слишком поздно,
@@ -316,7 +334,7 @@ function plugin_customhelpdesk_display_central() {
 
 
 /**
- * МЕТОД 3: Хук pre_show_item - инъекция стилей перед отображением элементов
+ * Хук pre_show_item - инъекция стилей перед отображением элементов
  * Получает массив с параметрами: ['item' => CommonDBTM, 'options' => array]
  */
 function plugin_customhelpdesk_pre_show_item($params = []) {
@@ -366,5 +384,34 @@ function plugin_customhelpdesk_pre_show_item($params = []) {
         echo '  background-attachment: fixed !important;';
         echo '}';
         echo '</style>';
+    }
+}
+/**
+ * Хук: Принудительное сохранение часов работы при редактировании Организации
+ */
+function plugin_customhelpdesk_force_save_entity_hours($item) {
+    global $DB;
+    
+    // Убеждаемся, что мы работаем именно с карточкой Организации
+    if ($item->getType() === 'Entity') {
+        $id = $item->getID();
+        
+        if ($id > 0) {
+            $updates = [];
+            
+            // Если поля пришли в запросе, добавляем их в массив обновления
+            if (array_key_exists('plugin_customhelpdesk_work_hours', $_POST)) {
+                $updates['plugin_customhelpdesk_work_hours'] = $_POST['plugin_customhelpdesk_work_hours'];
+            }
+            
+            if (array_key_exists('plugin_customhelpdesk_lunch_hours', $_POST)) {
+                $updates['plugin_customhelpdesk_lunch_hours'] = $_POST['plugin_customhelpdesk_lunch_hours'];
+            }
+            
+            // Если массив не пустой, обновляем базу стандартным методом GLPI (без escape)
+            if (!empty($updates)) {
+                $DB->update('glpi_entities', $updates, ['id' => $id]);
+            }
+        }
     }
 }
