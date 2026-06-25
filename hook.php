@@ -386,32 +386,21 @@ function plugin_customhelpdesk_pre_show_item($params = []) {
         echo '</style>';
     }
 }
+
 /**
- * Хук: Принудительное сохранение часов работы при редактировании Организации
+ * Хук: Принудительное сохранение часов работы
+ * Используем item_pre_update и item_pre_add, так как они имеют доступ к $item до записи
  */
 function plugin_customhelpdesk_force_save_entity_hours($item) {
-    global $DB;
+    // ВАЖНО: Мы НЕ используем $DB->update здесь, потому что GLPI сам сохранит $item
+    // Нам нужно лишь "подложить" наши данные в объект $item, чтобы он записал их как свои
     
-    // Убеждаемся, что мы работаем именно с карточкой Организации
     if ($item->getType() === 'Entity') {
-        $id = $item->getID();
-        
-        if ($id > 0) {
-            $updates = [];
-            
-            // Если поля пришли в запросе, добавляем их в массив обновления
-            if (array_key_exists('plugin_customhelpdesk_work_hours', $_POST)) {
-                $updates['plugin_customhelpdesk_work_hours'] = $_POST['plugin_customhelpdesk_work_hours'];
-            }
-            
-            if (array_key_exists('plugin_customhelpdesk_lunch_hours', $_POST)) {
-                $updates['plugin_customhelpdesk_lunch_hours'] = $_POST['plugin_customhelpdesk_lunch_hours'];
-            }
-            
-            // Если массив не пустой, обновляем базу стандартным методом GLPI (без escape)
-            if (!empty($updates)) {
-                $DB->update('glpi_entities', $updates, ['id' => $id]);
-            }
+        if (isset($_POST['plugin_customhelpdesk_work_hours'])) {
+            $item->input['plugin_customhelpdesk_work_hours'] = $_POST['plugin_customhelpdesk_work_hours'];
+        }
+        if (isset($_POST['plugin_customhelpdesk_lunch_hours'])) {
+            $item->input['plugin_customhelpdesk_lunch_hours'] = $_POST['plugin_customhelpdesk_lunch_hours'];
         }
     }
 }

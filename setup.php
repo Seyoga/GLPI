@@ -1,5 +1,7 @@
 <?php
 
+include_once __DIR__ . '/hook.php';
+
 define('PLUGIN_CUSTOMHELPDESK_VERSION', '1.0.0');
 
 
@@ -98,12 +100,10 @@ function plugin_init_customhelpdesk() {
         $PLUGIN_HOOKS['item_add']['customhelpdesk'] = [];
     }
     
-    $PLUGIN_HOOKS['item_update']['customhelpdesk'] = [
-        'Entity' => 'plugin_customhelpdesk_force_save_entity_hours'
-    ];
-    $PLUGIN_HOOKS['item_add']['customhelpdesk'] = [
-        'Entity' => 'plugin_customhelpdesk_force_save_entity_hours'
-    ];
+// --- ПЕРЕХВАТ СОХРАНЕНИЯ ОРГАНИЗАЦИИ ---
+    // Используем pre-хуки, чтобы GLPI увидел поля в объекте $item
+    $PLUGIN_HOOKS['item_pre_update']['customhelpdesk']['Entity'] = 'plugin_customhelpdesk_force_save_entity_hours';
+    $PLUGIN_HOOKS['item_pre_add']['customhelpdesk']['Entity'] = 'plugin_customhelpdesk_force_save_entity_hours';
 
     
 
