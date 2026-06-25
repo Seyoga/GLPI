@@ -2,7 +2,7 @@
 
 include_once __DIR__ . '/hook.php';
 
-define('PLUGIN_CUSTOMHELPDESK_VERSION', '1.0.0');
+define('PLUGIN_CUSTOMHELPDESK_VERSION', '1.0.1');
 
 
 function plugin_init_customhelpdesk() {
@@ -92,18 +92,14 @@ function plugin_init_customhelpdesk() {
     // Для админов хуки не регистрируются - стандартный интерфейс GLPI
     
     // --- Перехватываем создание и обновление Организации (Entity) ---
-    // Это нужно, чтобы GLPI принудительно сохранял кастомные поля
-    if (!isset($PLUGIN_HOOKS['item_update']['customhelpdesk'])) {
-        $PLUGIN_HOOKS['item_update']['customhelpdesk'] = [];
-    }
-    if (!isset($PLUGIN_HOOKS['item_add']['customhelpdesk'])) {
-        $PLUGIN_HOOKS['item_add']['customhelpdesk'] = [];
-    }
-    
-// --- ПЕРЕХВАТ СОХРАНЕНИЯ ОРГАНИЗАЦИИ ---
-    // Используем pre-хуки, чтобы GLPI увидел поля в объекте $item
-    $PLUGIN_HOOKS['item_pre_update']['customhelpdesk']['Entity'] = 'plugin_customhelpdesk_force_save_entity_hours';
-    $PLUGIN_HOOKS['item_pre_add']['customhelpdesk']['Entity'] = 'plugin_customhelpdesk_force_save_entity_hours';
+    // Это нужно, чтобы GLPI принудительно сохранял кастомные поля.
+    // ВАЖНО: используем item_update / item_add (постхуки, вызываются ПОСЛЕ записи в БД),
+    // а не pre_item_update / pre_item_add — иначе наши поля теряются внутри
+    // Entity::prepareInputForUpdate(), которая пересобирает $input под свою логику.
+    file_put_contents(__DIR__ . '/debug_init.log', '[' . date('Y-m-d H:i:s') . '] plugin_init_customhelpdesk дошёл до регистрации Entity-хуков' . PHP_EOL, FILE_APPEND);
+    $PLUGIN_HOOKS['item_update']['customhelpdesk']['Entity'] = 'plugin_customhelpdesk_force_save_entity_hours';
+    $PLUGIN_HOOKS['item_add']['customhelpdesk']['Entity'] = 'plugin_customhelpdesk_force_save_entity_hours';
+    file_put_contents(__DIR__ . '/debug_init.log', '[' . date('Y-m-d H:i:s') . '] Хуки зарегистрированы. Содержимое $PLUGIN_HOOKS[item_update]: ' . print_r($PLUGIN_HOOKS['item_update'] ?? 'НЕ УСТАНОВЛЕНО', true) . PHP_EOL, FILE_APPEND);
 
     
 

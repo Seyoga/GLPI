@@ -19,7 +19,18 @@ $(document).ready(function() {
         return urlParams.get('id') || $('input[name="id"]').val();
     }
 
+    // Экранирование значений перед вставкой в HTML-атрибуты (защита от XSS)
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     let isInjecting = false;
+    let observer = null; // объявляем заранее, чтобы можно было отключить изнутри injectEntityHours
 
     // Главная функция инъекции полей
     function injectEntityHours() {
@@ -46,12 +57,13 @@ $(document).ready(function() {
                 // На случай, если пока шел запрос, поля уже добавились
                 if ($('.custom-entity-hours-row').length > 0) {
                     isInjecting = false;
+                    if (observer) { observer.disconnect(); }
                     return;
                 }
 
                 const data = typeof response === 'string' ? JSON.parse(response) : response;
-                const workHours = data.work_hours || '';
-                const lunchHours = data.lunch_hours || '';
+                const workHours = escapeHtml(data.work_hours || '');
+                const lunchHours = escapeHtml(data.lunch_hours || '');
 
                 // Добавили класс custom-entity-hours-row для отслеживания дублей
                 const customFieldsHtml = `
@@ -78,6 +90,13 @@ $(document).ready(function() {
                 // Вставляем поля
                 targetTable.find('tbody tr').eq(2).after(customFieldsHtml);
                 isInjecting = false;
+
+                // ВАЖНО: поля вставлены один раз — больше не нужно следить за DOM.
+                // Отключаем наблюдатель, чтобы не конфликтовать с родным JS GLPI,
+                // который продолжает перестраивать ту же таблицу после загрузки/сохранения формы.
+                if (observer) {
+                    observer.disconnect();
+                }
             },
             error: function() {
                 isInjecting = false;
@@ -88,9 +107,11 @@ $(document).ready(function() {
     // 1. Пробуем запустить инъекцию сразу при загрузке (если таблица уже есть)
     injectEntityHours();
 
-    // 2. MutationObserver, который будет следить за изменениями DOM.
-    // Если пользователь перейдет в другую организацию или таблица подгрузится медленно, он это заметит.
-    const observer = new MutationObserver(function() {
+    // 2. MutationObserver — нужен только на случай, если таблица подгружается с задержкой
+    // (или вкладку Entity открыли через AJAX-переход без полной перезагрузки страницы).
+    // Как только поля вставлены один раз, наблюдатель сам отключается (см. выше),
+    // чтобы не реагировать на собственные изменения DOM от родного JS GLPI после сабмита формы.
+    observer = new MutationObserver(function() {
         if ($('table.tab_cadre_fixe').length > 0 && $('.custom-entity-hours-row').length === 0) {
             injectEntityHours();
         }

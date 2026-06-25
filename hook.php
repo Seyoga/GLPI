@@ -389,18 +389,72 @@ function plugin_customhelpdesk_pre_show_item($params = []) {
 
 /**
  * Хук: Принудительное сохранение часов работы
- * Используем item_pre_update и item_pre_add, так как они имеют доступ к $item до записи
+ *
+ * ВАЖНО: мы используем item_update / item_add (постхуки — вызываются ПОСЛЕ того,
+ * как GLPI уже выполнил свой собственный UPDATE/INSERT), а не pre_item_update/pre_item_add.
+ *
+ * Причина: Entity::prepareInputForUpdate() в ядре GLPI пересобирает $input под свою
+ * внутреннюю логику (наследование настроек от родительской сущности, валидация и т.д.),
+ * и наши кастомные поля, подложенные в $item->input на pre-хуке, не доживали до
+ * финального SQL-запроса — отсюда значения NULL в БД после сохранения.
+ *
+ * Поэтому здесь мы пишем поля в БД отдельным прямым запросом, уже зная точный ID сущности.
  */
 function plugin_customhelpdesk_force_save_entity_hours($item) {
-    // ВАЖНО: Мы НЕ используем $DB->update здесь, потому что GLPI сам сохранит $item
-    // Нам нужно лишь "подложить" наши данные в объект $item, чтобы он записал их как свои
-    
-    if ($item->getType() === 'Entity') {
-        if (isset($_POST['plugin_customhelpdesk_work_hours'])) {
-            $item->input['plugin_customhelpdesk_work_hours'] = $_POST['plugin_customhelpdesk_work_hours'];
-        }
-        if (isset($_POST['plugin_customhelpdesk_lunch_hours'])) {
-            $item->input['plugin_customhelpdesk_lunch_hours'] = $_POST['plugin_customhelpdesk_lunch_hours'];
-        }
+    global $DB;
+
+    $log = function ($msg) {
+        file_put_contents(
+            __DIR__ . '/debug_entity_hours.log',
+            '[' . date('Y-m-d H:i:s') . '] ' . $msg . PHP_EOL,
+            FILE_APPEND
+        );
+    };
+
+    $log('Хук вызван (постхук item_update/item_add). Тип item: ' . gettype($item));
+
+    if (!is_object($item)) {
+        $log('ОСТАНОВКА: $item не объект');
+        return;
+    }
+
+    $log('Класс item: ' . get_class($item) . ', getType(): ' . $item->getType());
+
+    if ($item->getType() !== 'Entity') {
+        $log('ОСТАНОВКА: getType() !== Entity');
+        return;
+    }
+
+    $entityId = (int) $item->getID();
+    $log('entityId = ' . $entityId);
+
+    if ($entityId <= 0) {
+        $log('ОСТАНОВКА: entityId <= 0');
+        return;
+    }
+
+    $log('$_POST work_hours isset: ' . (isset($_POST['plugin_customhelpdesk_work_hours']) ? 'да, значение=' . $_POST['plugin_customhelpdesk_work_hours'] : 'нет'));
+    $log('$_POST lunch_hours isset: ' . (isset($_POST['plugin_customhelpdesk_lunch_hours']) ? 'да, значение=' . $_POST['plugin_customhelpdesk_lunch_hours'] : 'нет'));
+
+    $update = [];
+    if (isset($_POST['plugin_customhelpdesk_work_hours'])) {
+        $update['plugin_customhelpdesk_work_hours'] = $_POST['plugin_customhelpdesk_work_hours'];
+    }
+    if (isset($_POST['plugin_customhelpdesk_lunch_hours'])) {
+        $update['plugin_customhelpdesk_lunch_hours'] = $_POST['plugin_customhelpdesk_lunch_hours'];
+    }
+
+    if (empty($update)) {
+        $log('ОСТАНОВКА: $update пустой массив');
+        return;
+    }
+
+    $log('Пытаемся выполнить $DB->update с данными: ' . print_r($update, true));
+
+    try {
+        $result = $DB->update('glpi_entities', $update, ['id' => $entityId]);
+        $log('Результат $DB->update: ' . var_export($result, true) . '; DB error: ' . $DB->error());
+    } catch (\Throwable $e) {
+        $log('ИСКЛЮЧЕНИЕ при $DB->update: ' . $e->getMessage() . ' в ' . $e->getFile() . ':' . $e->getLine());
     }
 }
