@@ -119,4 +119,20 @@ $(document).ready(function() {
 
     // Запускаем наблюдение за всем телом документа
     observer.observe(document.body, { childList: true, subtree: true });
+
+    // --- ПЕРЕХВАТЧИК ОТПРАВКИ ФОРМЫ ---
+    // Гарантирует, что данные наших полей улетят на сервер, 
+    // даже если сами инпуты случайно оказались вне тега <form>
+    $(document).on('submit', 'form', function() {
+        let workInput = $('input[name="plugin_customhelpdesk_work_hours"]').first();
+        let lunchInput = $('input[name="plugin_customhelpdesk_lunch_hours"]').first();
+
+        // Если поля существуют, создаем их невидимые копии прямо перед отправкой внутри самой формы
+        if (workInput.length > 0) {
+            $(this).append(`<input type="hidden" name="plugin_customhelpdesk_work_hours" value="${workInput.val()}">`);
+        }
+        if (lunchInput.length > 0) {
+            $(this).append(`<input type="hidden" name="plugin_customhelpdesk_lunch_hours" value="${lunchInput.val()}">`);
+        }
+    });
 });
