@@ -394,29 +394,19 @@ function plugin_customhelpdesk_pre_show_item($params = []) {
 function plugin_customhelpdesk_force_save_entity_hours($item) {
     global $DB;
     
-    // Убеждаемся, что мы работаем именно с карточкой Организации
     if ($item->getType() === 'Entity') {
         $id = $item->getID();
+        $updates = [];
         
-        // Если ID > 0, значит организация существует или только что создана
-        if ($id > 0) {
-            $updates = [];
-            
-            // Забираем наши часы прямо из сырого POST-запроса браузера
-            if (isset($_POST['plugin_customhelpdesk_work_hours'])) {
-                $updates['plugin_customhelpdesk_work_hours'] = $_POST['plugin_customhelpdesk_work_hours'];
-            }
-            if (isset($_POST['plugin_customhelpdesk_lunch_hours'])) {
-                $updates['plugin_customhelpdesk_lunch_hours'] = $_POST['plugin_customhelpdesk_lunch_hours'];
-            }
-            
-            // Если поля были в форме, принудительно пишем их в базу
-            if (count($updates) > 0) {
-                $DB->update('glpi_entities', $updates, ['id' => $id]);
-                
-                // Оставляем лог для отслеживания успеха
-                Toolbox::logInFile('customhelpdesk', "УСПЕХ! Часы работы записаны в БД для Организации с ID $id\n");
-            }
+        if (isset($_POST['plugin_customhelpdesk_work_hours'])) {
+            $updates['plugin_customhelpdesk_work_hours'] = $_POST['plugin_customhelpdesk_work_hours'];
+        }
+        if (isset($_POST['plugin_customhelpdesk_lunch_hours'])) {
+            $updates['plugin_customhelpdesk_lunch_hours'] = $_POST['plugin_customhelpdesk_lunch_hours'];
+        }
+        
+        if (count($updates) > 0) {
+            $DB->update('glpi_entities', $updates, ['id' => $id]);
         }
     }
 }
